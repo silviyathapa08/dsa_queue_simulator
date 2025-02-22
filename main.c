@@ -52,3 +52,29 @@ Vehicle readVehicleFromFile(FILE *file) {
     }
     return vehicle;
 }
+int main(int argc, char *argv[]) {
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
+    bool running = true;
+    Uint32 lastVehicleSpawn = 0;
+    const Uint32 SPAWN_INTERVAL = 500; // Spawn a vehicle every 500ms
+
+    srand(time(NULL));
+
+    initializeSDL(&window, &renderer);
+
+    // Initialize vehicles
+    Vehicle vehicles[MAX_VEHICLES] = {0};
+    int vehicleCount = 0;
+
+    // Initialize traffic lights
+    TrafficLight lights[4];
+    initializeTrafficLights(lights);
+
+    // Initialize statistics
+    Statistics stats = {
+        .vehiclesPassed = 0,
+        .totalVehicles = 0,
+        .vehiclesPerMinute = 0,
+        .startTime = SDL_GetTicks()
+    };
