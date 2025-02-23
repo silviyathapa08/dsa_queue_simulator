@@ -12,3 +12,27 @@ void writeVehicleToFile(FILE *file, Vehicle *vehicle) {
             vehicle->state, 
             vehicle->speed);
 }
+int SDL_main(int argc, char *argv[]) {
+    srand(time(NULL));
+    FILE *file = fopen("bin/vehicles.txt", "w");
+    if (!file) {
+        perror("Failed to open vehicles.txt");
+        return 1;
+    }
+
+    while (1) {
+        // Generation of a new vehicle
+        Direction spawnDirection = (Direction)(rand() % 4);
+        Vehicle *newVehicle = createVehicle(spawnDirection);
+
+
+        // Write the vehicle data to the file
+        writeVehicleToFile(file, newVehicle);
+        fflush(file); // Ensure data is written to the file immediately
+
+        // Free the vehicle memory
+        free(newVehicle);
+
+        // Wait for a short period before generating the next vehicle
+        SDL_Delay(2000); // 2 seconds delay
+    }
