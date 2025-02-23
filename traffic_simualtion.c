@@ -42,3 +42,63 @@ void initializeTrafficLights(TrafficLight *lights)
         .position = {INTERSECTION_X - LANE_WIDTH - TRAFFIC_LIGHT_HEIGHT, INTERSECTION_Y - LANE_WIDTH, TRAFFIC_LIGHT_HEIGHT, TRAFFIC_LIGHT_WIDTH},
         .direction = DIRECTION_WEST};
 }
+void updateTrafficLights(TrafficLight *lights)
+{
+    Uint32 currentTicks = SDL_GetTicks();
+    static Uint32 lastUpdateTicks = 0;
+
+    if (currentTicks - lastUpdateTicks >= 5000)
+    { // Change lights every 5 seconds
+        lastUpdateTicks = currentTicks;
+
+        // Check for high-priority lanes
+        for (int i = 0; i < 4; i++)
+        {
+            if (laneQueues[i].size > 10)
+            {
+                lanePriorities[i] = 1; // Set high priority
+            }
+            else if (laneQueues[i].size < 5)
+            {
+                lanePriorities[i] = 0; // Reset to normal priority
+            }
+        }
+
+        // Toggle lights based on priority
+        for (int i = 0; i < 4; i++)
+        {
+            if (lanePriorities[i] == 1)
+            {
+                lights[i].state = GREEN; // Give green light to high-priority lane
+            }
+            else
+            {
+                lights[i].state = (lights[i].state == RED) ? GREEN : RED; // Toggle lights
+            }
+        }
+    }
+}
+
+Vehicle *createVehicle(Direction direction)
+{
+    Vehicle *vehicle = (Vehicle *)malloc(sizeof(Vehicle));
+    vehicle->direction = direction;
+
+    // Set vehicle type with probabilities
+    int typeRoll = rand() % 100;
+    if (typeRoll < 5)
+    {
+        vehicle->type = AMBULANCE;
+    }
+    else if (typeRoll < 10)
+    {
+        vehicle->type = POLICE_CAR;
+    }
+    else if (typeRoll < 15)
+    {
+        vehicle->type = FIRE_TRUCK;
+    }
+    else
+    {
+        vehicle->type = REGULAR_CAR;
+    }
