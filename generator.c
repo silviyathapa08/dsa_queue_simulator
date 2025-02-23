@@ -36,3 +36,13 @@ int SDL_main(int argc, char *argv[]) {
         // Wait for a short period before generating the next vehicle
         SDL_Delay(2000); // 2 seconds delay
     }
+    //vehicle gen delay added
+    fclose(file);
+    return 0;
+}
+//Use queue operations to enqueue vehicles into their respective lanes
+// Additional comments for future expansion
+// TODO: Implement priority-based queueing for emergency vehicles
+// TODO: Optimize file I/O operations to reduce latency
+// Placeholder for future debugging logs
+// Code formatting check
