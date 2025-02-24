@@ -17,3 +17,15 @@ typedef enum {
     DIRECTION_EAST,
     DIRECTION_WEST
 } Direction;
+typedef enum {
+    TURN_NONE,
+    TURN_LEFT,
+    TURN_RIGHT
+} TurnDirection;
+
+typedef enum {
+    STATE_MOVING,
+    STATE_STOPPING,
+    STATE_STOPPED,
+    STATE_TURNING
+} VehicleState;
