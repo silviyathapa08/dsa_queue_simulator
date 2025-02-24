@@ -29,3 +29,33 @@ typedef enum {
     STATE_STOPPED,
     STATE_TURNING
 } VehicleState;
+typedef enum {
+    REGULAR_CAR,
+    AMBULANCE,
+    POLICE_CAR,
+    FIRE_TRUCK
+} VehicleType;
+
+typedef enum {
+    RED,
+    GREEN
+} TrafficLightState;
+
+#define TRAFFIC_LIGHT_WIDTH (LANE_WIDTH * 2)
+#define TRAFFIC_LIGHT_HEIGHT (LANE_WIDTH - LANE_WIDTH / 3)
+#define STOP_LINE_WIDTH 5
+
+typedef struct {
+    SDL_Rect rect;
+    VehicleType type;
+    Direction direction;
+    TurnDirection turnDirection;
+    VehicleState state;
+    float speed;
+    float x;
+    float y;
+    bool active;
+    float turnAngle;  
+    bool isInRightLane;
+    bool turnProgress;
+} Vehicle;
