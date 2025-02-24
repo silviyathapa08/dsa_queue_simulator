@@ -533,3 +533,13 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
             SDL_RenderFillRect(renderer, &laneDivider2);
         }
     }
+    // Add stop lines
+    SDL_Rect northStop = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH - STOP_LINE_WIDTH, LANE_WIDTH * 2, STOP_LINE_WIDTH};
+    SDL_Rect southStop = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y + LANE_WIDTH, LANE_WIDTH * 2, STOP_LINE_WIDTH};
+    SDL_Rect eastStop = {INTERSECTION_X + LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, STOP_LINE_WIDTH, LANE_WIDTH * 2};
+    SDL_Rect westStop = {INTERSECTION_X - LANE_WIDTH - STOP_LINE_WIDTH, INTERSECTION_Y - LANE_WIDTH, STOP_LINE_WIDTH, LANE_WIDTH * 2};
+    SDL_RenderFillRect(renderer, &northStop);
+    SDL_RenderFillRect(renderer, &southStop);
+    SDL_RenderFillRect(renderer, &eastStop);
+    SDL_RenderFillRect(renderer, &westStop);
+}
