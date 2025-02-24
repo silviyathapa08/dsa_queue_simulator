@@ -59,3 +59,28 @@ typedef struct {
     bool isInRightLane;
     bool turnProgress;
 } Vehicle;
+typedef struct {
+    TrafficLightState state;
+    int timer;
+    SDL_Rect position;
+    Direction direction;
+} TrafficLight;
+
+typedef struct {
+    int vehiclesPassed;
+    int totalVehicles;
+    float vehiclesPerMinute;
+    Uint32 startTime;
+} Statistics;
+
+// Queue data structure
+typedef struct Node {
+    Vehicle vehicle;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* front;
+    Node* rear;
+    int size;
+} Queue;
