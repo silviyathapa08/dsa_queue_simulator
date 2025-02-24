@@ -592,3 +592,26 @@ void renderSimulation(SDL_Renderer *renderer, Vehicle *vehicles, TrafficLight *l
 
     SDL_RenderPresent(renderer);
 }
+// Queue functions
+void initQueue(Queue *q)
+{
+    q->front = q->rear = NULL;
+    q->size = 0;
+}
+
+void enqueue(Queue *q, Vehicle vehicle)
+{
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    newNode->vehicle = vehicle;
+    newNode->next = NULL;
+    if (q->rear == NULL)
+    {
+        q->front = q->rear = newNode;
+    }
+    else
+    {
+        q->rear->next = newNode;
+        q->rear = newNode;
+    }
+    q->size++;
+}
