@@ -494,3 +494,20 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
          vehicle->active = false;
      }
  }
+ void renderRoads(SDL_Renderer *renderer)
+ {
+     SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // Gray color for roads
+ 
+     // Draw the intersection
+     SDL_Rect intersection = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, LANE_WIDTH * 2, LANE_WIDTH * 2};
+     SDL_RenderFillRect(renderer, &intersection);
+ 
+     // Draw main roads
+     SDL_Rect verticalRoad1 = {INTERSECTION_X - LANE_WIDTH, 0, LANE_WIDTH * 2, INTERSECTION_Y - LANE_WIDTH};
+     SDL_Rect verticalRoad2 = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y + LANE_WIDTH, LANE_WIDTH * 2, WINDOW_HEIGHT - INTERSECTION_Y - LANE_WIDTH};
+     SDL_Rect horizontalRoad1 = {0, INTERSECTION_Y - LANE_WIDTH, INTERSECTION_X - LANE_WIDTH, LANE_WIDTH * 2};
+     SDL_Rect horizontalRoad2 = {INTERSECTION_X + LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, WINDOW_WIDTH - INTERSECTION_X - LANE_WIDTH, LANE_WIDTH * 2};
+     SDL_RenderFillRect(renderer, &verticalRoad1);
+     SDL_RenderFillRect(renderer, &verticalRoad2);
+     SDL_RenderFillRect(renderer, &horizontalRoad1);
+     SDL_RenderFillRect(renderer, &horizontalRoad2);
