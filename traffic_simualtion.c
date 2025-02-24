@@ -543,3 +543,20 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
     SDL_RenderFillRect(renderer, &eastStop);
     SDL_RenderFillRect(renderer, &westStop);
 }
+void renderQueues(SDL_Renderer *renderer)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        int x = 10 + i * 200; // Adjust position for each lane
+        int y = 10;
+        Node *current = laneQueues[i].front;
+        while (current != NULL)
+        {
+            SDL_Rect vehicleRect = {x, y, 30, 30};
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue color for vehicles
+            SDL_RenderFillRect(renderer, &vehicleRect);
+            y += 40; // Move down for the next vehicle
+            current = current->next;
+        }
+    }
+}
