@@ -12,6 +12,7 @@ void writeVehicleToFile(FILE *file, Vehicle *vehicle) {
             vehicle->state, 
             vehicle->speed);
 }
+
 int SDL_main(int argc, char *argv[]) {
     srand(time(NULL));
     FILE *file = fopen("bin/vehicles.txt", "w");
@@ -36,7 +37,7 @@ int SDL_main(int argc, char *argv[]) {
         // Wait for a short period before generating the next vehicle
         SDL_Delay(2000); // 2 seconds delay
     }
-    //vehicle gen delay added
+//vehicle gen delay added
     fclose(file);
     return 0;
 }
