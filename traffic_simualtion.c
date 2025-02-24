@@ -615,3 +615,27 @@ void enqueue(Queue *q, Vehicle vehicle)
     }
     q->size++;
 }
+Vehicle dequeue(Queue *q)
+{
+    if (q->front == NULL)
+    {
+        Vehicle emptyVehicle = {0};
+        return emptyVehicle;
+    }
+    Node *temp = q->front;
+    Vehicle vehicle = temp->vehicle;
+    q->front = q->front->next;
+    if (q->front == NULL)
+    {
+        q->rear = NULL;
+    }
+    free(temp);
+    q->size--;
+    return vehicle;
+}
+
+int isQueueEmpty(Queue *q)
+{
+    return q->front == NULL;
+    //
+}
