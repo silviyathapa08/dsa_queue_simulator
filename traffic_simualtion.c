@@ -511,3 +511,25 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
      SDL_RenderFillRect(renderer, &verticalRoad2);
      SDL_RenderFillRect(renderer, &horizontalRoad1);
      SDL_RenderFillRect(renderer, &horizontalRoad2);
+     // Draw lane dividers
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    for (int i = 0; i < WINDOW_HEIGHT; i += 40)
+    {
+        if (i < INTERSECTION_Y - LANE_WIDTH || i > INTERSECTION_Y + LANE_WIDTH)
+        {
+            SDL_Rect laneDivider1 = {INTERSECTION_X - LANE_WIDTH / 2 - 1, i, 2, 20};
+            SDL_Rect laneDivider2 = {INTERSECTION_X + LANE_WIDTH / 2 - 1, i, 2, 20};
+            SDL_RenderFillRect(renderer, &laneDivider1);
+            SDL_RenderFillRect(renderer, &laneDivider2);
+        }
+    }
+    for (int i = 0; i < WINDOW_WIDTH; i += 40)
+    {
+        if (i < INTERSECTION_X - LANE_WIDTH || i > INTERSECTION_X + LANE_WIDTH)
+        {
+            SDL_Rect laneDivider1 = {i, INTERSECTION_Y - LANE_WIDTH / 2 - 1, 20, 2};
+            SDL_Rect laneDivider2 = {i, INTERSECTION_Y + LANE_WIDTH / 2 - 1, 20, 2};
+            SDL_RenderFillRect(renderer, &laneDivider1);
+            SDL_RenderFillRect(renderer, &laneDivider2);
+        }
+    }
