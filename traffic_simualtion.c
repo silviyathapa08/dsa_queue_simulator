@@ -306,3 +306,191 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
             break;
         }
     }
+     // Update vehicle state based on stopping conditions
+     if (shouldStop)
+     {
+         vehicle->state = STATE_STOPPING;
+         vehicle->speed *= 0.8f; // Increased deceleration
+         if (vehicle->speed < 0.1f)
+         {
+             vehicle->state = STATE_STOPPED;
+             vehicle->speed = 0;
+         }
+     }
+     else if (vehicle->state == STATE_STOPPED && !shouldStop)
+     {
+         vehicle->state = STATE_MOVING;
+         // Reset speed based on vehicle type
+         switch (vehicle->type)
+         {
+         case AMBULANCE:
+         case POLICE_CAR:
+             vehicle->speed = 4.0f;
+             break;
+         case FIRE_TRUCK:
+             vehicle->speed = 3.5f;
+             break;
+         default:
+             vehicle->speed = 2.0f;
+         }
+     }
+ 
+     // Decrease speed as vehicle approaches turn point
+     if (vehicle->state == STATE_MOVING && vehicle->turnDirection != TURN_NONE)
+     {
+         float distanceToTurnPoint = 0;
+         switch (vehicle->direction)
+         {
+         case DIRECTION_NORTH:
+         case DIRECTION_SOUTH:
+             distanceToTurnPoint = fabs(vehicle->y - turnPoint);
+             break;
+         case DIRECTION_EAST:
+         case DIRECTION_WEST:
+             distanceToTurnPoint = fabs(vehicle->x - turnPoint);
+             break;
+         }
+ 
+         if (distanceToTurnPoint < stopDistance)
+         {
+             vehicle->speed *= 1.0f;
+             if (vehicle->speed < 0.5f)
+             {
+                 vehicle->speed = 0.5f;
+             }
+         }
+     }
+ 
+     // Check if at turning point
+     bool atTurnPoint = false;
+     switch (vehicle->direction)
+     {
+     case DIRECTION_NORTH:
+         atTurnPoint = vehicle->y <= turnPoint;
+         break;
+     case DIRECTION_SOUTH:
+         atTurnPoint = vehicle->y >= turnPoint;
+         break;
+     case DIRECTION_EAST:
+         atTurnPoint = vehicle->x >= turnPoint;
+         break;
+     case DIRECTION_WEST:
+         atTurnPoint = vehicle->x <= turnPoint;
+         break;
+     }
+ 
+     // Start turning if at turn point
+     if (atTurnPoint && vehicle->turnDirection != TURN_NONE &&
+         vehicle->state != STATE_TURNING && vehicle->state != STATE_STOPPED)
+     {
+         vehicle->state = STATE_TURNING;
+         vehicle->turnAngle = 0.0f;
+         vehicle->turnProgress = 0.0f;
+     }
+ 
+     // Movement logic
+     float moveSpeed = vehicle->speed;
+     if (vehicle->state == STATE_MOVING || vehicle->state == STATE_STOPPING)
+     {
+         switch (vehicle->direction)
+         {
+         case DIRECTION_NORTH:
+             vehicle->y -= moveSpeed;
+             break;
+         case DIRECTION_SOUTH:
+             vehicle->y += moveSpeed;
+             break;
+         case DIRECTION_EAST:
+             vehicle->x += moveSpeed;
+             break;
+         case DIRECTION_WEST:
+             vehicle->x -= moveSpeed;
+             break;
+         }
+     }
+     else if (vehicle->state == STATE_TURNING)
+     {
+         // Calculate turn angle based on vehicle type
+         float turnSpeed = 1.0f;
+         switch (vehicle->type)
+         {
+         case AMBULANCE:
+         case POLICE_CAR:
+             turnSpeed = 2.0f;
+             break;
+         case FIRE_TRUCK:
+             turnSpeed = 1.5f;
+             break;
+         default:
+             turnSpeed = 1.0f;
+         }
+ 
+         vehicle->turnAngle += turnSpeed;
+         vehicle->turnProgress = vehicle->turnAngle / 90.0f;
+         if (vehicle->turnAngle >= 90.0f)
+         {
+             vehicle->state = STATE_MOVING;
+             vehicle->turnAngle = 0.0f;
+             vehicle->turnProgress = 0.0f;
+             vehicle->isInRightLane = !vehicle->isInRightLane;
+         }
+ 
+         // Calculate new position based on turn angle
+         float turnRadius = 0.5f;
+         float turnCenterX = 0;
+         float turnCenterY = 0;
+         float turnCenter = 15;
+         switch (vehicle->direction)
+         {
+         case DIRECTION_NORTH:
+             turnCenterX = vehicle->x + (vehicle->isInRightLane ? turnCenter : -turnCenter);
+             turnCenterY = vehicle->y;
+             ;
+             break;
+         case DIRECTION_SOUTH:
+             turnCenterX = vehicle->x + (vehicle->isInRightLane ? -turnCenter : turnCenter);
+             turnCenterY = vehicle->y;
+             break;
+         case DIRECTION_EAST:
+             turnCenterX = vehicle->x;
+             turnCenterY = vehicle->y + (!vehicle->isInRightLane ? turnCenter : -turnCenter);
+             break;
+         case DIRECTION_WEST:
+             turnCenterX = vehicle->x;
+             turnCenterY = vehicle->y + (!vehicle->isInRightLane ? -turnCenter : turnCenter);
+             break;
+         }
+ 
+         float radians = vehicle->turnAngle * M_PI / 180.0f;
+         switch (vehicle->direction)
+         {
+         case DIRECTION_NORTH:
+             vehicle->x = turnCenterX + turnRadius * sin(radians);
+             vehicle->y = turnCenterY - turnRadius * cos(radians);
+             break;
+         case DIRECTION_SOUTH:
+             vehicle->x = turnCenterX - turnRadius * sin(radians);
+             vehicle->y = turnCenterY + turnRadius * cos(radians);
+             break;
+         case DIRECTION_EAST:
+             vehicle->x = turnCenterX + turnRadius * cos(radians);
+             vehicle->y = turnCenterY + turnRadius * sin(radians);
+             break;
+         case DIRECTION_WEST:
+             vehicle->x = turnCenterX - turnRadius * cos(radians);
+             vehicle->y = turnCenterY - turnRadius * sin(radians);
+             break;
+         }
+     }
+ 
+     // Update rectangle position
+     vehicle->rect.x = (int)vehicle->x;
+     vehicle->rect.y = (int)vehicle->y;
+ 
+     // Check if vehicle has left the screen
+     if (vehicle->x < -100 || vehicle->x > WINDOW_WIDTH + 100 ||
+         vehicle->y < -100 || vehicle->y > WINDOW_HEIGHT + 100)
+     {
+         vehicle->active = false;
+     }
+ }
