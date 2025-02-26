@@ -1,0 +1,4 @@
+E:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator/build/CMakeFiles/MainApp.dir
+E:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator/build/CMakeFiles/GeneratorApp.dir
+E:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator/build/CMakeFiles/ALL_BUILD.dir
+E:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator/build/CMakeFiles/ZERO_CHECK.dir

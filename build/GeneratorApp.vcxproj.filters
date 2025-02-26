@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="E:\DSA-silviya\DSA-queue-simulator\dsa-queue-simulator\generator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\DSA-silviya\DSA-queue-simulator\dsa-queue-simulator\traffic_simulation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\DSA-silviya\DSA-queue-simulator\dsa-queue-simulator\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{BEDD4A28-BB90-303A-A659-B231DCE7A423}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

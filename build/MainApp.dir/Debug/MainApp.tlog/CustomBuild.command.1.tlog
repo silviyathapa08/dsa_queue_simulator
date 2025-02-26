@@ -1,0 +1,10 @@
+^E:\DSA-SILVIYA\DSA-QUEUE-SIMULATOR\DSA-QUEUE-SIMULATOR\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator -BE:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator/build --check-stamp-file E:/DSA-silviya/DSA-queue-simulator/dsa-queue-simulator/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

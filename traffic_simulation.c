@@ -8,10 +8,10 @@ Queue laneQueues[4];         // Queues for lanes A, B, C, D
 int lanePriorities[4] = {0}; // Priority levels for lanes (0 = normal, 1 = high)
 
 const SDL_Color VEHICLE_COLORS[] = {
-    {0, 0, 255, 255}, // REGULAR_CAR: Blue
-    {255, 0, 0, 255}, // AMBULANCE: Red
+    {0, 0, 0, 0}, // REGULAR_CAR: Black
+    {250, 250, 250, 250}, // AMBULANCE: White
     {0, 0, 128, 255}, // POLICE_CAR: Dark Blue
-    {255, 69, 0, 255} // FIRE_TRUCK: Orange-Red
+    {255, 0, 0, 255} // FIRE_TRUCK: Orange-Red
 };
 
 //vehicle addition
@@ -502,7 +502,7 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
 
 void renderRoads(SDL_Renderer *renderer)
 {
-    SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // Gray color for roads
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 50); // Gray color for roads
 
     // Draw the intersection
     SDL_Rect intersection = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, LANE_WIDTH * 2, LANE_WIDTH * 2};
@@ -583,7 +583,7 @@ void renderSimulation(SDL_Renderer *renderer, Vehicle *vehicles, TrafficLight *l
     {
         SDL_SetRenderDrawColor(renderer, 64, 64, 64, 255); // Dark gray for housing
         SDL_RenderFillRect(renderer, &lights[i].position);
-        SDL_SetRenderDrawColor(renderer, (lights[i].state == RED) ? 255 : 0, (lights[i].state == GREEN) ? 255 : 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, (lights[i].state == RED) ? 250 : 0, (lights[i].state == GREEN) ? 255 : 0, 0, 0);
         SDL_RenderFillRect(renderer, &lights[i].position);
     }
 
