@@ -7,17 +7,22 @@
 Queue laneQueues[4];         // Queues for lanes A, B, C, D
 int lanePriorities[4] = {0}; // Priority levels for lanes (0 = normal, 1 = high)
 
+// Updated modern color scheme for vehicles
 const SDL_Color VEHICLE_COLORS[] = {
-    {0, 0, 0, 0}, // REGULAR_CAR: Black
-    {250, 250, 250, 250}, // AMBULANCE: White
-    {0, 0, 128, 255}, // POLICE_CAR: Dark Blue
-    {255, 0, 0, 255} // FIRE_TRUCK: Orange-Red
+    {60, 60, 70, 255},       // REGULAR_CAR: Dark slate gray
+    {240, 240, 255, 255},    // AMBULANCE: Bright white with blue tint
+    {30, 50, 140, 255},      // POLICE_CAR: Dark navy blue
+    {220, 60, 10, 255}       // FIRE_TRUCK: Bright red-orange
 };
 
-//vehicle addition
-// renderVehicle(renderer, vehicleType, vehicleRect.x, vehicleRect.y, vehicleRect.w, vehicleRect.h);
-//tried keeping imaeges but was too frustating so goig with the rectangular blocks!! 
-
+// Road and UI color scheme
+const SDL_Color ROAD_COLOR = {40, 40, 45, 255};      // Darker asphalt
+const SDL_Color GRASS_COLOR = {60, 150, 80, 255};    // Grass green
+const SDL_Color LANE_DIVIDER_COLOR = {240, 240, 200, 255}; // Off-white/yellow lane markers
+const SDL_Color STOP_LINE_COLOR = {255, 255, 255, 255};    // White stop lines
+const SDL_Color BACKGROUND_COLOR = {100, 180, 130, 255};   // Light green background (grass/terrain)
+const SDL_Color QUEUE_FRAME_COLOR = {50, 50, 60, 200};     // Dark frame for queue display
+const SDL_Color QUEUE_BG_COLOR = {220, 220, 220, 180};     // Light gray semi-transparent background
 
 void initializeTrafficLights(TrafficLight *lights)
 {
@@ -36,7 +41,6 @@ void initializeTrafficLights(TrafficLight *lights)
         .timer = 0,
         .position = {INTERSECTION_X + LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, TRAFFIC_LIGHT_HEIGHT, TRAFFIC_LIGHT_WIDTH},
         .direction = DIRECTION_EAST};
-        //traffic light generation 
     lights[3] = (TrafficLight){
         .state = GREEN,
         .timer = 0,
@@ -500,9 +504,16 @@ void updateVehicle(Vehicle *vehicle, TrafficLight *lights)
     }
 }
 
+// Enhanced road rendering with texture effect
 void renderRoads(SDL_Renderer *renderer)
 {
-    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 50); // Gray color for roads
+    // First draw the background (grass/terrain)
+    SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR.r, BACKGROUND_COLOR.g, BACKGROUND_COLOR.b, BACKGROUND_COLOR.a);
+    SDL_Rect backgroundRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+    SDL_RenderFillRect(renderer, &backgroundRect);
+    
+    // Draw the asphalt roads
+    SDL_SetRenderDrawColor(renderer, ROAD_COLOR.r, ROAD_COLOR.g, ROAD_COLOR.b, ROAD_COLOR.a);
 
     // Draw the intersection
     SDL_Rect intersection = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, LANE_WIDTH * 2, LANE_WIDTH * 2};
@@ -518,14 +529,27 @@ void renderRoads(SDL_Renderer *renderer)
     SDL_RenderFillRect(renderer, &horizontalRoad1);
     SDL_RenderFillRect(renderer, &horizontalRoad2);
 
-    // Draw lane dividers
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    // Add road texture effect - simple grid pattern
+    SDL_SetRenderDrawColor(renderer, 50, 50, 55, 50); // Slightly lighter than the road
+    for (int x = 0; x < WINDOW_WIDTH; x += 20) {
+        for (int y = 0; y < WINDOW_HEIGHT; y += 20) {
+            // Only add texture on road areas
+            if ((x >= INTERSECTION_X - LANE_WIDTH && x <= INTERSECTION_X + LANE_WIDTH) ||
+                (y >= INTERSECTION_Y - LANE_WIDTH && y <= INTERSECTION_Y + LANE_WIDTH)) {
+                SDL_Rect textureRect = {x, y, 2, 2};
+                SDL_RenderFillRect(renderer, &textureRect);
+            }
+        }
+    }
+
+    // Draw lane dividers - make them more visible
+    SDL_SetRenderDrawColor(renderer, LANE_DIVIDER_COLOR.r, LANE_DIVIDER_COLOR.g, LANE_DIVIDER_COLOR.b, LANE_DIVIDER_COLOR.a);
     for (int i = 0; i < WINDOW_HEIGHT; i += 40)
     {
         if (i < INTERSECTION_Y - LANE_WIDTH || i > INTERSECTION_Y + LANE_WIDTH)
         {
-            SDL_Rect laneDivider1 = {INTERSECTION_X - LANE_WIDTH / 2 - 1, i, 2, 20};
-            SDL_Rect laneDivider2 = {INTERSECTION_X + LANE_WIDTH / 2 - 1, i, 2, 20};
+            SDL_Rect laneDivider1 = {INTERSECTION_X - LANE_WIDTH / 2 - 1, i, 3, 25}; // Wider and longer dividers
+            SDL_Rect laneDivider2 = {INTERSECTION_X + LANE_WIDTH / 2 - 1, i, 3, 25};
             SDL_RenderFillRect(renderer, &laneDivider1);
             SDL_RenderFillRect(renderer, &laneDivider2);
         }
@@ -534,72 +558,380 @@ void renderRoads(SDL_Renderer *renderer)
     {
         if (i < INTERSECTION_X - LANE_WIDTH || i > INTERSECTION_X + LANE_WIDTH)
         {
-            SDL_Rect laneDivider1 = {i, INTERSECTION_Y - LANE_WIDTH / 2 - 1, 20, 2};
-            SDL_Rect laneDivider2 = {i, INTERSECTION_Y + LANE_WIDTH / 2 - 1, 20, 2};
+            SDL_Rect laneDivider1 = {i, INTERSECTION_Y - LANE_WIDTH / 2 - 1, 25, 3};
+            SDL_Rect laneDivider2 = {i, INTERSECTION_Y + LANE_WIDTH / 2 - 1, 25, 3};
             SDL_RenderFillRect(renderer, &laneDivider1);
             SDL_RenderFillRect(renderer, &laneDivider2);
         }
     }
 
-    // Add stop lines
-    SDL_Rect northStop = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH - STOP_LINE_WIDTH, LANE_WIDTH * 2, STOP_LINE_WIDTH};
-    SDL_Rect southStop = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y + LANE_WIDTH, LANE_WIDTH * 2, STOP_LINE_WIDTH};
-    SDL_Rect eastStop = {INTERSECTION_X + LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, STOP_LINE_WIDTH, LANE_WIDTH * 2};
-    SDL_Rect westStop = {INTERSECTION_X - LANE_WIDTH - STOP_LINE_WIDTH, INTERSECTION_Y - LANE_WIDTH, STOP_LINE_WIDTH, LANE_WIDTH * 2};
+    // Add stop lines with enhanced visibility
+    SDL_SetRenderDrawColor(renderer, STOP_LINE_COLOR.r, STOP_LINE_COLOR.g, STOP_LINE_COLOR.b, STOP_LINE_COLOR.a);
+    
+    // Make stop lines thicker for better visibility
+    int stopLineThickness = STOP_LINE_WIDTH * 2;
+    
+    SDL_Rect northStop = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH - stopLineThickness, LANE_WIDTH * 2, stopLineThickness};
+    SDL_Rect southStop = {INTERSECTION_X - LANE_WIDTH, INTERSECTION_Y + LANE_WIDTH, LANE_WIDTH * 2, stopLineThickness};
+    SDL_Rect eastStop = {INTERSECTION_X + LANE_WIDTH, INTERSECTION_Y - LANE_WIDTH, stopLineThickness, LANE_WIDTH * 2};
+    SDL_Rect westStop = {INTERSECTION_X - LANE_WIDTH - stopLineThickness, INTERSECTION_Y - LANE_WIDTH, stopLineThickness, LANE_WIDTH * 2};
+    
     SDL_RenderFillRect(renderer, &northStop);
     SDL_RenderFillRect(renderer, &southStop);
     SDL_RenderFillRect(renderer, &eastStop);
     SDL_RenderFillRect(renderer, &westStop);
 }
 
+// Enhanced queue visualization
 void renderQueues(SDL_Renderer *renderer)
 {
+    const char* laneNames[4] = {"North", "South", "East", "West"};
+    
+    // First draw a background panel for the queue display
+    SDL_SetRenderDrawColor(renderer, QUEUE_FRAME_COLOR.r, QUEUE_FRAME_COLOR.g, QUEUE_FRAME_COLOR.b, QUEUE_FRAME_COLOR.a);
+    SDL_Rect queuePanel = {10, 10, WINDOW_WIDTH - 20, 80};
+    SDL_RenderFillRect(renderer, &queuePanel);
+    
+    SDL_SetRenderDrawColor(renderer, QUEUE_BG_COLOR.r, QUEUE_BG_COLOR.g, QUEUE_BG_COLOR.b, QUEUE_BG_COLOR.a);
+    SDL_Rect queueInnerPanel = {12, 12, WINDOW_WIDTH - 24, 76};
+    SDL_RenderFillRect(renderer, &queueInnerPanel);
+    
+    int laneWidth = (WINDOW_WIDTH - 40) / 4;
+    
     for (int i = 0; i < 4; i++)
     {
-        int x = 10 + i * 200; // Adjust position for each lane
-        int y = 10;
+        int baseX = 20 + i * laneWidth;
+        int baseY = 20;
+        
+        // Add dividers between lanes
+        if (i > 0) {
+            SDL_SetRenderDrawColor(renderer, QUEUE_FRAME_COLOR.r, QUEUE_FRAME_COLOR.g, QUEUE_FRAME_COLOR.b, 100);
+            SDL_Rect divider = {baseX - 5, 15, 2, 70};
+            SDL_RenderFillRect(renderer, &divider);
+        }
+        
+        // Draw lane name
+        // (In a real implementation, you would use SDL_ttf for text rendering)
+        
+        // For each vehicle in queue, draw a colored dot
+        int dotSize = 12;
+        int maxDotsPerRow = 6;
         Node *current = laneQueues[i].front;
+        int count = 0;
         while (current != NULL)
         {
-            SDL_Rect vehicleRect = {x, y, 30, 30};
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue color for vehicles
-            SDL_RenderFillRect(renderer, &vehicleRect);
-            y += 40; // Move down for the next vehicle
+            int row = count / maxDotsPerRow;
+            int col = count % maxDotsPerRow;
+            
+            int dotX = baseX + col * (dotSize + 4);
+            int dotY = baseY + 15 + row * (dotSize + 4);
+            
+            SDL_Rect vehicleDot = {dotX, dotY, dotSize, dotSize};
+            
+            // Get color based on vehicle type
+            SDL_Color color = VEHICLE_COLORS[current->vehicle.type];
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+            SDL_RenderFillRect(renderer, &vehicleDot);
+            
+            // Add small border around the dot
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 100);
+            SDL_Rect border = {dotX-1, dotY-1, dotSize+2, dotSize+2};
+            SDL_RenderDrawRect(renderer, &border);
+            
             current = current->next;
+            count++;
         }
+        
+        // Draw count number
+        char countStr[10];
+        sprintf(countStr, "%d", laneQueues[i].size);
+        // (In a real implementation, you would render this text with SDL_ttf)
     }
+}
+
+// Enhanced traffic light rendering
+void renderTrafficLight(SDL_Renderer *renderer, TrafficLight *light)
+{
+    // Draw traffic light housing with a more 3D look
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255); // Dark gray base
+    SDL_RenderFillRect(renderer, &light->position);
+    
+    // Add lighter edge on top/left for 3D effect
+    SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
+    if (light->direction == DIRECTION_NORTH || light->direction == DIRECTION_SOUTH) {
+        SDL_Rect topEdge = {light->position.x, light->position.y, light->position.w, 2};
+        SDL_Rect leftEdge = {light->position.x, light->position.y, 2, light->position.h};
+        SDL_RenderFillRect(renderer, &topEdge);
+        SDL_RenderFillRect(renderer, &leftEdge);
+    } else {
+        SDL_Rect topEdge = {light->position.x, light->position.y, light->position.h, 2};
+        SDL_Rect leftEdge = {light->position.x, light->position.y, 2, light->position.w};
+        SDL_RenderFillRect(renderer, &topEdge);
+        SDL_RenderFillRect(renderer, &leftEdge);
+    }
+    
+    // Draw the light itself with a glow effect
+    int padding = 4;
+    SDL_Rect lightRect = {
+        light->position.x + padding,
+        light->position.y + padding,
+        light->position.w - padding * 2,
+        light->position.h - padding * 2
+    };
+    
+    // Light color with full brightness
+    SDL_SetRenderDrawColor(renderer, 
+        light->state == RED ? 255 : 40,   // R
+        light->state == GREEN ? 255 : 40, // G
+        40,                               // B
+        255);                             // A
+    
+    SDL_RenderFillRect(renderer, &lightRect);
+    
+    // Add a glow effect (lighter center)
+    int innerPadding = padding + 3;
+    SDL_Rect glowRect = {
+        light->position.x + innerPadding,
+        light->position.y + innerPadding,
+        light->position.w - innerPadding * 2,
+        light->position.h - innerPadding * 2
+    };
+    
+    SDL_SetRenderDrawColor(renderer, 
+        light->state == RED ? 255 : 80,   // R 
+        light->state == GREEN ? 255 : 80, // G
+        80,                               // B
+        255);                             // A
+    
+    SDL_RenderFillRect(renderer, &glowRect);
+}
+
+// Enhanced vehicle rendering
+void renderVehicle(SDL_Renderer *renderer, Vehicle *vehicle)
+{
+    if (!vehicle->active)
+        return;
+    
+    // Base vehicle color
+    SDL_Color baseColor = VEHICLE_COLORS[vehicle->type];
+    
+    // Draw the main vehicle body
+    SDL_SetRenderDrawColor(renderer, baseColor.r, baseColor.g, baseColor.b, baseColor.a);
+    SDL_RenderFillRect(renderer, &vehicle->rect);
+    
+    // Add vehicle details based on type
+    int detailPadding = 2;
+    SDL_Rect detailRect = {
+        vehicle->rect.x + detailPadding,
+        vehicle->rect.y + detailPadding,
+        vehicle->rect.w - detailPadding * 2,
+        vehicle->rect.h - detailPadding * 2
+    };
+    
+    // Add vehicle type-specific details
+    switch (vehicle->type) {
+        case AMBULANCE:
+            // White cross for ambulance
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            if (vehicle->direction == DIRECTION_NORTH || vehicle->direction == DIRECTION_SOUTH) {
+                int crossW = vehicle->rect.w / 3;
+                int crossH = vehicle->rect.h / 2;
+                int crossX = vehicle->rect.x + (vehicle->rect.w - crossW) / 2;
+                int crossY = vehicle->rect.y + (vehicle->rect.h - crossH) / 2;
+                
+                SDL_Rect verticalBar = {
+                    crossX + crossW/2 - 2,
+                    crossY,
+                    4,
+                    crossH
+                };
+                SDL_Rect horizontalBar = {
+                    crossX,
+                    crossY + crossH/2 - 2,
+                    crossW,
+                    4
+                };
+                SDL_RenderFillRect(renderer, &verticalBar);
+                SDL_RenderFillRect(renderer, &horizontalBar);
+            } else {
+                int crossW = vehicle->rect.w / 2;
+                int crossH = vehicle->rect.h / 3;
+                int crossX = vehicle->rect.x + (vehicle->rect.w - crossW) / 2;
+                int crossY = vehicle->rect.y + (vehicle->rect.h - crossH) / 2;
+                
+                SDL_Rect verticalBar = {
+                    crossX + crossW/2 - 2,
+                    crossY,
+                    4,
+                    crossH
+                };
+                SDL_Rect horizontalBar = {
+                    crossX,
+                    crossY + crossH/2 - 2,
+                    crossW,
+                    4
+                };
+                SDL_RenderFillRect(renderer, &verticalBar);
+                SDL_RenderFillRect(renderer, &horizontalBar);
+            }
+            break;
+            
+        case POLICE_CAR:
+            // Blue/red stripe for police car
+            if (vehicle->direction == DIRECTION_NORTH || vehicle->direction == DIRECTION_SOUTH) {
+                SDL_Rect redStripe = {
+                    vehicle->rect.x,
+                    vehicle->rect.y + vehicle->rect.h / 4,
+                    vehicle->rect.w,
+                    vehicle->rect.h / 8
+                };
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                SDL_RenderFillRect(renderer, &redStripe);
+                
+                SDL_Rect blueStripe = {
+                    vehicle->rect.x,
+                    vehicle->rect.y + vehicle->rect.h / 4 + vehicle->rect.h / 8,
+                    vehicle->rect.w,
+                    vehicle->rect.h / 8
+                };
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+                SDL_RenderFillRect(renderer, &blueStripe);
+            } else {
+                SDL_Rect redStripe = {
+                    vehicle->rect.x + vehicle->rect.w / 4,
+                    vehicle->rect.y,
+                    vehicle->rect.w / 8,
+                    vehicle->rect.h
+                };
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                SDL_RenderFillRect(renderer, &redStripe);
+                
+                SDL_Rect blueStripe = {
+                    vehicle->rect.x + vehicle->rect.w / 4 + vehicle->rect.w / 8,
+                    vehicle->rect.y,
+                    vehicle->rect.w / 8,
+                    vehicle->rect.h
+                };
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+                SDL_RenderFillRect(renderer, &blueStripe);
+            }
+            break;
+            
+        case FIRE_TRUCK:
+            // Yellow stripe for fire truck
+            if (vehicle->direction == DIRECTION_NORTH || vehicle->direction == DIRECTION_SOUTH) {
+                SDL_Rect stripe = {
+                    vehicle->rect.x,
+                    vehicle->rect.y + vehicle->rect.h / 3,
+                    vehicle->rect.w,
+                    vehicle->rect.h / 6
+                };
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                SDL_RenderFillRect(renderer, &stripe);
+            } else {
+                SDL_Rect stripe = {
+                    vehicle->rect.x + vehicle->rect.w / 3,
+                    vehicle->rect.y,
+                    vehicle->rect.w / 6,
+                    vehicle->rect.h
+                };
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                SDL_RenderFillRect(renderer, &stripe);
+            }
+            break;
+            
+        case REGULAR_CAR:
+            // Add windows to regular car
+            SDL_SetRenderDrawColor(renderer, 180, 210, 240, 255); // Light blue windows
+            
+            if (vehicle->direction == DIRECTION_NORTH || vehicle->direction == DIRECTION_SOUTH) {
+                SDL_Rect windshield = {
+                    vehicle->rect.x + 3,
+                    vehicle->rect.y + 3,
+                    vehicle->rect.w - 6,
+                    vehicle->rect.h / 3
+                };
+                SDL_RenderFillRect(renderer, &windshield);
+                
+                SDL_Rect rearWindow = {
+                    vehicle->rect.x + 3,
+                    vehicle->rect.y + vehicle->rect.h - vehicle->rect.h / 3 - 3,
+                    vehicle->rect.w - 6,
+                    vehicle->rect.h / 3 - 3
+                };
+                SDL_RenderFillRect(renderer, &rearWindow);
+            } else {
+                SDL_Rect windshield = {
+                    vehicle->rect.x + 3,
+                    vehicle->rect.y + 3,
+                    vehicle->rect.w / 3,
+                    vehicle->rect.h - 6
+                };
+                SDL_RenderFillRect(renderer, &windshield);
+                
+                SDL_Rect rearWindow = {
+                    vehicle->rect.x + vehicle->rect.w - vehicle->rect.w / 3 - 3,
+                    vehicle->rect.y + 3,
+                    vehicle->rect.w / 3 - 3,
+                    vehicle->rect.h - 6
+                };
+                SDL_RenderFillRect(renderer, &rearWindow);
+            }
+            break;
+    }
+    
+    // Add 3D effect with a darker shadow on the bottom/right
+    SDL_SetRenderDrawColor(renderer, 
+        baseColor.r > 50 ? baseColor.r - 50 : 0, 
+        baseColor.g > 50 ? baseColor.g - 50 : 0, 
+        baseColor.b > 50 ? baseColor.b - 50 : 0, 
+        baseColor.a);
+    
+    SDL_Rect bottomEdge = {
+        vehicle->rect.x,
+        vehicle->rect.y + vehicle->rect.h - 2,
+        vehicle->rect.w,
+        2
+    };
+    SDL_Rect rightEdge = {
+        vehicle->rect.x + vehicle->rect.w - 2,
+        vehicle->rect.y,
+        2,
+        vehicle->rect.h
+    };
+    
+    SDL_RenderFillRect(renderer, &bottomEdge);
+    SDL_RenderFillRect(renderer, &rightEdge);
 }
 
 void renderSimulation(SDL_Renderer *renderer, Vehicle *vehicles, TrafficLight *lights, Statistics *stats)
 {
-    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); // Brighter background color
+    // Draw background
+    SDL_SetRenderDrawColor(renderer, BACKGROUND_COLOR.r, BACKGROUND_COLOR.g, BACKGROUND_COLOR.b, BACKGROUND_COLOR.a);
     SDL_RenderClear(renderer);
 
-    // Render roads
+    // Render roads with textures and markings
     renderRoads(renderer);
 
-    // Render traffic lights
+    // Render enhanced traffic lights
     for (int i = 0; i < 4; i++)
     {
-        SDL_SetRenderDrawColor(renderer, 64, 64, 64, 255); // Dark gray for housing
-        SDL_RenderFillRect(renderer, &lights[i].position);
-        SDL_SetRenderDrawColor(renderer, (lights[i].state == RED) ? 250 : 0, (lights[i].state == GREEN) ? 255 : 0, 0, 0);
-        SDL_RenderFillRect(renderer, &lights[i].position);
+        renderTrafficLight(renderer, &lights[i]);
     }
 
-    // Render vehicles
+    // Render enhanced vehicles
     for (int i = 0; i < MAX_VEHICLES; i++)
     {
         if (vehicles[i].active)
         {
-            SDL_SetRenderDrawColor(renderer, VEHICLE_COLORS[vehicles[i].type].r, VEHICLE_COLORS[vehicles[i].type].g, VEHICLE_COLORS[vehicles[i].type].b, VEHICLE_COLORS[vehicles[i].type].a);
-            SDL_RenderFillRect(renderer, &vehicles[i].rect);
+            renderVehicle(renderer, &vehicles[i]);
         }
     }
 
-    // Render queues
+    // Render queue display
     renderQueues(renderer);
 
+    // Present the rendered frame
     SDL_RenderPresent(renderer);
 }
 
@@ -649,5 +981,4 @@ Vehicle dequeue(Queue *q)
 int isQueueEmpty(Queue *q)
 {
     return q->front == NULL;
-
 }
