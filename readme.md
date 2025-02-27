@@ -23,3 +23,4 @@ gcc -o traffic_sim main.c traffic_simulation.c -lSDL2 -lm
 ./traffic_sim
 ```
 
+![Traffic Simulator Demo](DSA.gif)
