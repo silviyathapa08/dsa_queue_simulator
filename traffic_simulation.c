@@ -582,71 +582,14 @@ void renderRoads(SDL_Renderer *renderer)
     SDL_RenderFillRect(renderer, &westStop);
 }
 
-// Enhanced queue visualization
+// Queue visualization (hidden)
 void renderQueues(SDL_Renderer *renderer)
 {
-    const char* laneNames[4] = {"North", "South", "East", "West"};
+    // This function now keeps track of queue data internally
+    // but doesn't render any visual elements to the screen
     
-    // First draw a background panel for the queue display
-    SDL_SetRenderDrawColor(renderer, QUEUE_FRAME_COLOR.r, QUEUE_FRAME_COLOR.g, QUEUE_FRAME_COLOR.b, QUEUE_FRAME_COLOR.a);
-    SDL_Rect queuePanel = {10, 10, WINDOW_WIDTH - 20, 80};
-    SDL_RenderFillRect(renderer, &queuePanel);
-    
-    SDL_SetRenderDrawColor(renderer, QUEUE_BG_COLOR.r, QUEUE_BG_COLOR.g, QUEUE_BG_COLOR.b, QUEUE_BG_COLOR.a);
-    SDL_Rect queueInnerPanel = {12, 12, WINDOW_WIDTH - 24, 76};
-    SDL_RenderFillRect(renderer, &queueInnerPanel);
-    
-    int laneWidth = (WINDOW_WIDTH - 40) / 4;
-    
-    for (int i = 0; i < 4; i++)
-    {
-        int baseX = 20 + i * laneWidth;
-        int baseY = 20;
-        
-        // Add dividers between lanes
-        if (i > 0) {
-            SDL_SetRenderDrawColor(renderer, QUEUE_FRAME_COLOR.r, QUEUE_FRAME_COLOR.g, QUEUE_FRAME_COLOR.b, 100);
-            SDL_Rect divider = {baseX - 5, 15, 2, 70};
-            SDL_RenderFillRect(renderer, &divider);
-        }
-        
-        // Draw lane name
-        // (In a real implementation, you would use SDL_ttf for text rendering)
-        
-        // For each vehicle in queue, draw a colored dot
-        int dotSize = 12;
-        int maxDotsPerRow = 6;
-        Node *current = laneQueues[i].front;
-        int count = 0;
-        while (current != NULL)
-        {
-            int row = count / maxDotsPerRow;
-            int col = count % maxDotsPerRow;
-            
-            int dotX = baseX + col * (dotSize + 4);
-            int dotY = baseY + 15 + row * (dotSize + 4);
-            
-            SDL_Rect vehicleDot = {dotX, dotY, dotSize, dotSize};
-            
-            // Get color based on vehicle type
-            SDL_Color color = VEHICLE_COLORS[current->vehicle.type];
-            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-            SDL_RenderFillRect(renderer, &vehicleDot);
-            
-            // Add small border around the dot
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 100);
-            SDL_Rect border = {dotX-1, dotY-1, dotSize+2, dotSize+2};
-            SDL_RenderDrawRect(renderer, &border);
-            
-            current = current->next;
-            count++;
-        }
-        
-        // Draw count number
-        char countStr[10];
-        sprintf(countStr, "%d", laneQueues[i].size);
-        // (In a real implementation, you would render this text with SDL_ttf)
-    }
+    // Note: We still maintain the queue data structure for traffic flow logic
+    // but we're not displaying it as requested by the user
 }
 
 // Enhanced traffic light rendering
